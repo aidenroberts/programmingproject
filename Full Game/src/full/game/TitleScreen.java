@@ -25,6 +25,9 @@ import javafx.scene.text.Text;
 public class TitleScreen extends Pane{
     public static double width = 1000, height = 1000;
     public boolean created = false, loaded = false, gameplayLoaded = false;
+    public static File song = new File("Aiden's song.mp3");
+    public static Media media = new Media(song.toURI().toString());
+    public static MediaPlayer mp = new MediaPlayer(media);
     
     public TitleScreen() {
         createScreen();
@@ -37,10 +40,6 @@ public class TitleScreen extends Pane{
         titleScreen.setFitHeight(height);
         titleScreen.setFitWidth(width);
         
-        
-        File song = new File("Aiden's song.mp3");
-        Media media = new Media(song.toURI().toString());
-        MediaPlayer mp = new MediaPlayer(media);
         mp.setCycleCount(Timeline.INDEFINITE);
         mp.play();
         
@@ -138,6 +137,10 @@ public class TitleScreen extends Pane{
             ivWarrior.setLayoutX(0);
             ivWarrior.setLayoutY(height * .225);
 
+            Text warriorInfo = new Text(width * .15, height * .3, "Balanced Stats");
+            warriorInfo.setFont(Font.font("Times", 32));
+            
+            
             Button tank = new Button("Tank");
             tank.setFont(Font.font("Times", 12));
             tank.setLayoutX(width * .85);
@@ -161,6 +164,9 @@ public class TitleScreen extends Pane{
             ivTank.setLayoutX(0);
             ivTank.setLayoutY(height * .4);
 
+            Text tankInfo = new Text(width * .15, height * .475, "High health, low speed");
+            tankInfo.setFont(Font.font("Times", 32));
+            
             Button speedster = new Button("Speedster");
             speedster.setFont(Font.font("Times", 12));
             speedster.setLayoutX(width * .75);
@@ -184,6 +190,9 @@ public class TitleScreen extends Pane{
             ivSpeedster.setLayoutX(0);
             ivSpeedster.setLayoutY(height * .6);
 
+            Text speedsterInfo = new Text(width * .15, height * .675, "High speed, low damage");
+            speedsterInfo.setFont(Font.font("Times", 32));
+            
             Button glassCanon = new Button("Glass Cannon");
             glassCanon.setFont(Font.font("Times", 10));
             glassCanon.setLayoutX(width * .735);
@@ -194,7 +203,7 @@ public class TitleScreen extends Pane{
                 getChildren().clear();
                 classNum = 4;
                 health = 50;
-                speed = 100;
+                speed = 75;
                 damage = 125;
                 makeName();
             });
@@ -207,11 +216,14 @@ public class TitleScreen extends Pane{
             ivGlassCanon.setLayoutX(0);
             ivGlassCanon.setLayoutY(height * .8);
             
+            Text glassCannonInfo = new Text(width * .15, height * .875, "High damage, low health");
+            glassCannonInfo.setFont(Font.font("Times", 32));
+            
             backToTitle.setLayoutX(width / 3.5);
             backToTitle.setLayoutY(0);
             backToTitle.setFont(Font.font("Times", 32));
             
-            getChildren().addAll(warrior, ivWarrior, tank, ivTank, speedster, ivSpeedster, glassCanon, ivGlassCanon, backToTitle);
+            getChildren().addAll(warrior, ivWarrior, warriorInfo, tank, ivTank, tankInfo, speedster, ivSpeedster, speedsterInfo, glassCanon, ivGlassCanon, glassCannonInfo, backToTitle);
         }
         
         public void makeName() {
@@ -248,8 +260,9 @@ public class TitleScreen extends Pane{
             stats.setText(info);
             stats.setLayoutX(width / 4);
             stats.setLayoutY(height / 3);
-            stats.setPrefSize(width / 2, height / 3);
+            stats.setPrefSize(width / 2, height / 3.5);
             stats.setFont(Font.font("Times", 24));
+            stats.setEditable(false);
             
             TextField nameEntry = new TextField();
             nameEntry.setLayoutX(width / 7);
@@ -259,6 +272,7 @@ public class TitleScreen extends Pane{
             nameEntry.setOnAction(e -> {
                 name = nameEntry.getText();
                 getChildren().clear();
+                mp.stop();
                 Gameplay pane = new Gameplay(name, classNum, health, speed, damage);
                 getChildren().add(pane);
             });
@@ -277,30 +291,6 @@ public class TitleScreen extends Pane{
             });
             
             getChildren().addAll(background, nameEntry, prompt, stats, backToTitle, backToSelection);
-        }
-
-        public int getClassNum() {
-            return classNum;
-        }
-
-        public String getName() {
-            return name;
-        }
-        
-        public boolean titleClear() {
-            return titleClear;
-        }
-        
-        public int getHealth() {
-            return health;
-        }
-        
-        public int getSpeed() {
-            return speed;
-        }
-        
-        public int getDamage() {
-            return damage;
         }
     }
     
@@ -332,7 +322,8 @@ public class TitleScreen extends Pane{
             stats.setLayoutX(width / 4);
             stats.setLayoutY(height / 3);
             stats.setPrefSize(width / 2, height / 3.5);
-            stats.setFont(Font.font("Times", 12));
+            stats.setFont(Font.font("Times", 24));
+            stats.setEditable(false);
             
             backToTitle.setFont(Font.font("Times", 48));
             backToTitle.setLayoutX(width / 3.875);
@@ -345,6 +336,7 @@ public class TitleScreen extends Pane{
             getChildren().addAll(background, prompt, saveList, backToTitle, loadGame, stats);
             
             saveList.setOnAction(e -> {
+                loadFile();
                 String info = "";
                 info += "Name: " + name;
                 switch (classNum) {
@@ -369,6 +361,13 @@ public class TitleScreen extends Pane{
                 info += "\nXP: " + xp;
                 
                 stats.setText(info);
+            });
+            
+            loadGame.setOnAction(e -> {
+               getChildren().clear();
+               mp.stop();
+               Gameplay pane = new Gameplay(name, classNum, health, speed, damage, level, xp, cLevel);
+               getChildren().add(pane);
             });
         }
         
