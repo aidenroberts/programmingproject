@@ -21,7 +21,6 @@ public class FullGame extends Application {
         primaryStage.show();
         
         primaryStage.setResizable(false);
-        
     }
 
     

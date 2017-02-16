@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Scanner;
 import javafx.animation.Timeline;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -269,42 +271,67 @@ public class TitleScreen extends Pane{
             nameEntry.setLayoutY(height / 4);
             nameEntry.setFont(Font.font("Times", 32));
             nameEntry.setPrefWidth(width * .75);
-            nameEntry.setOnAction(e -> {
-                name = nameEntry.getText();
-                getChildren().clear();
-                mp.stop();
-                Gameplay pane = new Gameplay(name, classNum, health, speed, damage);
-                getChildren().add(pane);
-            });
             
-            backToTitle.setLayoutX(width / 4);
+            backToTitle.setLayoutX(width / 2.8);
             backToTitle.setLayoutY(height / 1.5);
-            backToTitle.setFont(Font.font("Times", 48));
+            backToTitle.setFont(Font.font("Times", 32));
             
-            backToSelection.setLayoutX(width / 4);
-            backToSelection.setLayoutY(height / 1.25);
-            backToSelection.setFont(Font.font("Times", 48));
+            backToSelection.setLayoutX(width / 3);
+            backToSelection.setLayoutY(height / 1.3);
+            backToSelection.setFont(Font.font("Times", 32));
+            
+            Button startGame = new Button("Start Playing");
+            startGame.setLayoutX(width / 2.5);
+            startGame.setLayoutY(height / 1.15);
+            startGame.setFont(Font.font("Times", 32));
             
             backToSelection.setOnAction(e -> {
                getChildren().clear();
                createScene(); 
             });
             
-            getChildren().addAll(background, nameEntry, prompt, stats, backToTitle, backToSelection);
+            getChildren().addAll(background, nameEntry, prompt, stats, backToTitle, backToSelection, startGame);
+            
+            startGame.setOnAction(e -> {
+                name = nameEntry.getText();
+                if (name != null) {
+                    getChildren().clear();
+                    mp.stop();
+                    Gameplay pane = new Gameplay(name, classNum, health, speed, damage);
+                    getChildren().add(pane);
+                }
+            });
+            
+            nameEntry.setOnAction(e -> {
+                name = nameEntry.getText();
+                if (name != null) {
+                    getChildren().clear();
+                    mp.stop();
+                    Gameplay pane = new Gameplay(name, classNum, health, speed, damage);
+                    getChildren().add(pane);
+                }
+            });
         }
     }
     
     static class Loading extends Pane {
-        public int classNum, health, speed, damage, xp, level, cLevel;
+        public int classNum, health, maxHealth, speed, damage, xp, level, cLevel, timesSaved;
         String name;
         Button backToTitle = new Button("Back To Title Screen"), loadGame = new Button("Load Selected File");
         ComboBox saveList = new ComboBox();
-        ArrayList<String> names;
+        ArrayList<String> names = new ArrayList<>();
         ObservableList<String> nameList;
         
         public Loading() {
             loadGames();
-            
+            createScene();
+        }
+        
+        public Loading(int cond) {
+            loadGames();
+        }
+        
+        public void createScene() {
             Rectangle background = new Rectangle(0, 0, width, height);
             background.setFill(Color.GREY);
             
@@ -359,36 +386,33 @@ public class TitleScreen extends Pane{
                 info += "\nDamage: " + damage;
                 info += "\nArea #: " + level;
                 info += "\nXP: " + xp;
+                info += "\nTimes Saved: " + timesSaved;
                 
                 stats.setText(info);
+                
+                loadGame.setOnAction(f -> {
+                   getChildren().clear();
+                   mp.stop();
+                   Gameplay pane = new Gameplay(name, classNum, health, maxHealth, speed, damage, level, xp, cLevel, timesSaved);
+                   getChildren().add(pane);
+                });
             });
             
-            loadGame.setOnAction(e -> {
-               getChildren().clear();
-               mp.stop();
-               Gameplay pane = new Gameplay(name, classNum, health, speed, damage, level, xp, cLevel);
-               getChildren().add(pane);
-            });
+            
         }
-        
         public void loadGames() {
             try {
-                FileInputStream list = new FileInputStream("saves\\SaveList.sav");
+                FileInputStream list = new FileInputStream("E:/Full Game/saves/saves.sav");
                 ObjectInputStream save = new ObjectInputStream(list);
                 
                 names = (ArrayList<String>)save.readObject();
                 
-                nameList = (ObservableList)names;
+                nameList = FXCollections.observableArrayList(names);
                 
                 saveList.setItems(nameList);
                 
                 save.close();
             } catch(Exception ex) {
-                Text nothing = new Text(width / 8, height / 2, "No files exist.");
-                nothing.setFont(Font.font("Times", 128));
-                nothing.setFill(Color.YELLOW);
-                
-                getChildren().add(nothing);
             }
             
             
@@ -396,23 +420,26 @@ public class TitleScreen extends Pane{
         }
         
         public void loadFile() {
-            name = names.get(nameList.indexOf(saveList.getValue()));
-            String fileName = "saves\\" + name + ".sav";
+            String fileName = names.get(nameList.indexOf(saveList.getValue()));
             
             try {
-                FileInputStream saveFile = new FileInputStream(fileName);
-                ObjectInputStream save = new ObjectInputStream(saveFile);
+                File file = new File("saves/" + fileName + ".txt");
+                Scanner input = new Scanner(file);
                 
-                this.classNum = (Integer)save.readObject();
-                this.health = (Integer)save.readObject();
-                this.speed = (Integer)save.readObject();
-                this.damage = (Integer)save.readObject();
-                this.xp = (Integer)save.readObject();
-                this.level = (Integer)save.readObject();
-                this.cLevel = (Integer)save.readObject();
+                this.name = input.nextLine();
+                this.classNum = Integer.parseInt(input.nextLine());
+                this.health = Integer.parseInt(input.nextLine());
+                this.maxHealth = Integer.parseInt(input.nextLine());
+                this.speed = Integer.parseInt(input.nextLine());
+                this.damage = Integer.parseInt(input.nextLine());
+                this.xp = Integer.parseInt(input.nextLine());
+                this.level = Integer.parseInt(input.nextLine());
+                this.cLevel = Integer.parseInt(input.nextLine());
+                this.timesSaved = Integer.parseInt(input.nextLine());
                 
-                save.close();
+                input.close();
             } catch (Exception ex) {
+                System.out.println("error");
             }
         }
     }
