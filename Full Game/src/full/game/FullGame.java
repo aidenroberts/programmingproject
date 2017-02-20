@@ -15,7 +15,7 @@ public class FullGame extends Application {
         TitleScreen title = new TitleScreen();
         root.setTop(title);
         
-        Scene scene = new Scene(root, 1000, 1000);
+        Scene scene = new Scene(root, 500, 500);
         primaryStage.setTitle("E-Lemon-Ators");
         primaryStage.setScene(scene);
         primaryStage.show();
