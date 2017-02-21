@@ -1,6 +1,6 @@
 package full.game;
 
-import java.io.File;
+import java.io.File; // Imports all necessary files for the game
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -104,7 +104,7 @@ public class TitleScreen extends Pane{
             background.setFill(Color.GREY);
             getChildren().add(background);
 
-            Text prompt = new Text(width * .45, height * .11, "Select a class: "); // Creates the prompt on the Select a Class Screen
+            Text prompt = new Text(width * .45, height * .125, "Select a class: "); // Creates the prompt on the Select a Class Screen
             prompt.setFont(Font.font("Times", FontWeight.BOLD, 12));
             prompt.setScaleX(width * .006);
             prompt.setScaleY(height * .006);
@@ -221,9 +221,10 @@ public class TitleScreen extends Pane{
             glassCannonInfo.setFont(Font.font("Times", 20));
             
             backToTitle.setLayoutX(width / 2.5); // Creates a button that sends the user back to the Title Screen
-            backToTitle.setLayoutY(0);
-            backToTitle.setScaleX(width * .0025);
+            backToTitle.setLayoutY(10);
+            backToTitle.setScaleX(width * .003);
             backToTitle.setScaleY(height * .003);
+            backToTitle.setFont(Font.font("Times", 10));
             
             getChildren().addAll(warrior, ivWarrior, warriorInfo, tank, ivTank, tankInfo, speedster, ivSpeedster, speedsterInfo, glassCanon, ivGlassCanon, glassCannonInfo, backToTitle);
         }
@@ -299,6 +300,7 @@ public class TitleScreen extends Pane{
                     mp.stop();
                     Gameplay pane = new Gameplay(name, classNum, health, speed, damage);
                     getChildren().add(pane);
+                    pane.createScene();
                 }
             });
         }
@@ -307,6 +309,8 @@ public class TitleScreen extends Pane{
     static class Loading extends Pane {
         public int classNum, health, maxHealth, speed, damage, xp, level, cLevel, timesSaved;
         String name;
+        double x, y;
+        boolean bossDefeated;
         Button backToTitle = new Button("Back To Title Screen"), loadGame = new Button("Load Selected File");
         ComboBox saveList = new ComboBox();
         ArrayList<String> names = new ArrayList<>();
@@ -322,80 +326,81 @@ public class TitleScreen extends Pane{
         }
         
         public void createScene() {
-            Rectangle background = new Rectangle(0, 0, width, height); // Creates the grey background of the Load Game screen
-            background.setFill(Color.GREY);
-            
-            Text prompt = new Text(width / 2.25, height / 10, "Select a save file: "); // Creates a Text that prompts the user to select a save file
-            prompt.setFill(Color.YELLOW);
-            prompt.setFont(Font.font("Times", 12));
-            prompt.setScaleX(width * .006);
-            prompt.setScaleY(height * .006);
-            
-            saveList.setLayoutX(width / 4.25); // Creates a ComboBox that contains the save files
-            saveList.setLayoutY(height / 4);
-            saveList.setPrefSize(width / 1.9, height / 20);
-            
-            TextArea stats = new TextArea(); // Creates a TextArea that shows the loaded Character's game information
-            stats.setLayoutX(width / 4);
-            stats.setLayoutY(height / 3);
-            stats.setPrefSize(width / 2, height / 3.5);
-            stats.setFont(Font.font("Times", 16));
-            stats.setEditable(false);
-            
-            backToTitle.setFont(Font.font("Times", 24)); // Creates a button that sends the user back to the Title Screen
-            backToTitle.setLayoutX(width / 3.875);
-            backToTitle.setLayoutY(height / 1.5);
-            
-            loadGame.setFont(Font.font("Times", 24)); // Creates a button that starts the game once the user selects a save file
-            loadGame.setLayoutX(width / 3.6125);
-            loadGame.setLayoutY(height / 1.25);
-            loadGame.setDisable(true);
-            
-            getChildren().addAll(background, prompt, saveList, backToTitle, loadGame, stats);
-            
-            saveList.setOnAction(e -> { // Creates the function of the ComboBox that loads the save file that is clicked on
-                loadFile();
-                String info = "";
-                info += "Name: " + name;
-                switch (classNum) {
-                    case 1:
-                        info += "\nClass: Warrior";
-                        break;
-                    case 2:
-                        info += "\nClass: Tank";
-                        break;
-                    case 3:
-                        info += "\nClass: Speedster";
-                        break;
-                    default:
-                        info += "\nClass: Glass Cannon";
-                        break;
-                }
-                info += "\nLevel: " + cLevel;
-                info += "\nHealth: " + health;
-                info += "\nSpeed: " + speed;
-                info += "\nDamage: " + damage;
-                info += "\nArea #: " + level;
-                info += "\nXP: " + xp;
-                info += "\nTimes Saved: " + timesSaved;
-                
-                stats.setText(info);
-                
-                loadGame.setDisable(false); // Enables the Load Game button
-                
-                loadGame.setOnAction(f -> { // Creates the function of the button that continues the game
-                   getChildren().clear();
-                   mp.stop();
-                   Gameplay pane = new Gameplay(name, classNum, health, maxHealth, speed, damage, level, xp, cLevel, timesSaved);
-                   getChildren().add(pane);
+            if (!names.isEmpty()) {
+                Rectangle background = new Rectangle(0, 0, width, height); // Creates the grey background of the Load Game screen
+                background.setFill(Color.GREY);
+
+                Text prompt = new Text(width / 2.25, height / 10, "Select a save file: "); // Creates a Text that prompts the user to select a save file
+                prompt.setFill(Color.YELLOW);
+                prompt.setFont(Font.font("Times", 12));
+                prompt.setScaleX(width * .006);
+                prompt.setScaleY(height * .006);
+
+                saveList.setLayoutX(width / 4.25); // Creates a ComboBox that contains the save files
+                saveList.setLayoutY(height / 4);
+                saveList.setPrefSize(width / 1.9, height / 20);
+
+                TextArea stats = new TextArea(); // Creates a TextArea that shows the loaded Character's game information
+                stats.setLayoutX(width / 4);
+                stats.setLayoutY(height / 3);
+                stats.setPrefSize(width / 2, height / 3.5);
+                stats.setFont(Font.font("Times", 16));
+                stats.setEditable(false);
+
+                backToTitle.setFont(Font.font("Times", 24)); // Creates a button that sends the user back to the Title Screen
+                backToTitle.setLayoutX(width / 3.875);
+                backToTitle.setLayoutY(height / 1.5);
+
+                loadGame.setFont(Font.font("Times", 24)); // Creates a button that starts the game once the user selects a save file
+                loadGame.setLayoutX(width / 3.6125);
+                loadGame.setLayoutY(height / 1.25);
+                loadGame.setDisable(true);
+
+                getChildren().addAll(background, prompt, saveList, backToTitle, loadGame, stats);
+
+                saveList.setOnAction(e -> { // Creates the function of the ComboBox that loads the save file that is clicked on
+                    loadFile();
+                    String info = "";
+                    info += "Name: " + name;
+                    switch (classNum) {
+                        case 1:
+                            info += "\nClass: Warrior";
+                            break;
+                        case 2:
+                            info += "\nClass: Tank";
+                            break;
+                        case 3:
+                            info += "\nClass: Speedster";
+                            break;
+                        default:
+                            info += "\nClass: Glass Cannon";
+                            break;
+                    }
+                    info += "\nLevel: " + cLevel;
+                    info += "\nHealth: " + health;
+                    info += "\nSpeed: " + speed;
+                    info += "\nDamage: " + damage;
+                    info += "\nArea #: " + level;
+                    info += "\nXP: " + xp;
+                    info += "\nTimes Saved: " + timesSaved;
+
+                    stats.setText(info);
+
+                    loadGame.setDisable(false); // Enables the Load Game button
+
+                    loadGame.setOnAction(f -> { // Creates the function of the button that continues the game
+                       getChildren().clear();
+                       mp.stop();
+                       Gameplay pane = new Gameplay(name, classNum, health, maxHealth, speed, damage, level, xp, cLevel, timesSaved, bossDefeated, x, y);
+                       getChildren().add(pane);
+                       pane.createScene();
+                    });
                 });
-            });
-            
-            
+            }
         }
         public void loadGames() {
             try { // Loads the list of save files in the user's game memory
-                FileInputStream list = new FileInputStream("saves/saves.sav");
+                FileInputStream list = new FileInputStream("saves\\saves.sav");
                 ObjectInputStream save = new ObjectInputStream(list);
                 
                 names = (ArrayList<String>)save.readObject();
@@ -405,11 +410,19 @@ public class TitleScreen extends Pane{
                 saveList.setItems(nameList);
                 
                 save.close();
-            } catch(Exception ex) {
+            } catch(Exception ex) { // If no saves are present, an error screen appears
+                getChildren().clear();
+                
+                ErrorScreen pane = new ErrorScreen("No save files detected.");
+                
+                getChildren().add(pane);
+                
+                pane.backToTitle.setOnAction(e -> {
+                   getChildren().clear();
+                   TitleScreen title = new TitleScreen();
+                   getChildren().add(title);
+                });
             }
-            
-            
-            
         }
         
         public void loadFile() {
@@ -429,6 +442,9 @@ public class TitleScreen extends Pane{
                 this.level = Integer.parseInt(input.nextLine());
                 this.cLevel = Integer.parseInt(input.nextLine());
                 this.timesSaved = Integer.parseInt(input.nextLine());
+                this.bossDefeated = Boolean.parseBoolean(input.nextLine());
+                this.x = Double.parseDouble(input.nextLine());
+                this.y = Double.parseDouble(input.nextLine());
                 
                 input.close();
             } catch (Exception ex) {

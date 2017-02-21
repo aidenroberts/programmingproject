@@ -1,6 +1,6 @@
 package full.game;
 
-import javafx.application.Application;
+import javafx.application.Application; // Imports all necessary files for the game
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;

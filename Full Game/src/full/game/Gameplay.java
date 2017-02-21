@@ -1,6 +1,6 @@
 package full.game;
 
-import full.game.TitleScreen.Loading;
+import full.game.TitleScreen.Loading; // Imports all necessary files for the game
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
@@ -22,11 +22,12 @@ import javafx.util.Duration;
 
 public class Gameplay extends Pane{
     int classNum, health, speed, damage, level, xp, cLevel, timesSaved, maxHealth;
+    double x = 225, y = 225;
     String name;
     Exploration movement;
     boolean allowMove = true, bossDefeated = false;
     
-    public Gameplay(String name, int classNum, int health, int maxHealth, int speed, int damage, int level, int xp, int cLevel, int timesSaved) {
+    public Gameplay(String name, int classNum, int health, int maxHealth, int speed, int damage, int level, int xp, int cLevel, int timesSaved, boolean bossDefeated, double x, double y) {
         this.name = name; // Sets the stats of a character if the game was loaded
         this.classNum = classNum;
         this.health = health;
@@ -37,12 +38,14 @@ public class Gameplay extends Pane{
         this.xp = xp;
         this.cLevel = cLevel;
         this.timesSaved = timesSaved;
+        this.bossDefeated = bossDefeated;
+        this.x = x;
+        this.y = y;
         
         Rectangle background = new Rectangle(0, 0, 500, 500); // Creates the scene of the game
         background.setFill(Color.GREY);
         movement = new Exploration();
-        ButtonToStart pane = new ButtonToStart();
-        getChildren().addAll(background, movement, pane);
+        getChildren().addAll(background, movement);
     }
     
     public Gameplay(String name, int classNum, int health, int speed, int damage) {
@@ -60,8 +63,7 @@ public class Gameplay extends Pane{
         Rectangle background = new Rectangle(0, 0, 500, 500); // Creates the scene of the game
         background.setFill(Color.GREY);
         movement = new Exploration();
-        ButtonToStart pane = new ButtonToStart();
-        getChildren().addAll(background, movement, pane);
+        getChildren().addAll(background, movement);
     }
     
     public void backToMap() { // Sends the user back to the exploration screen
@@ -118,6 +120,8 @@ public class Gameplay extends Pane{
                     break;
             }
             
+            x = movement.ivModel.getX();
+            y = movement.ivModel.getY();
         });
         
         this.requestFocus();
@@ -187,6 +191,9 @@ public class Gameplay extends Pane{
             save.println(level);
             save.println(cLevel);
             save.println(timesSaved);
+            save.println(bossDefeated);
+            save.println(x);
+            save.println(y);
             
             save.close();
         } catch(Exception e){
@@ -649,38 +656,66 @@ public class Gameplay extends Pane{
         ImageView ivModel;
         ImageView ivBoss;
         int upN = 1, downN = 1, leftN = 1, rightN = 1;
+        Image[] model = new Image[4];
+        
         public Exploration() { // Creates the user's sprite that moves and the sprite of the boss that, if run into, triggers a boss fight
             File cha;
-            Image model;
-            
             
             switch (classNum) {
                 case 1:
                     cha = new File("characters\\Warrior Character.png");
-                    model = new Image(cha.toURI().toString());
-                    ivModel = new ImageView(model);
+                    model[0] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\Warrior back walking 1.png");
+                    model[1] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\Warrior back walking 2.png");
+                    model[2] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\Warrior back walking 3.png");
+                    model[3] = new Image(cha.toURI().toString());
+                    
+                    ivModel = new ImageView(model[0]);
                     break;
                 case 2:
                     cha = new File("characters\\Tank Character.png");
-                    model = new Image(cha.toURI().toString());
-                    ivModel = new ImageView(model);
+                    model[0] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\tank walking back 1.png");
+                    model[1] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\tank walking back 2.png");
+                    model[2] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\tank walking back 3.png");
+                    model[3] = new Image(cha.toURI().toString());
+                    
+                    ivModel = new ImageView(model[1]);
                     break;
                 case 3:
                     cha = new File("characters\\Speedster Character.png");
-                    model = new Image(cha.toURI().toString());
-                    ivModel = new ImageView(model);
+                    model[0] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\speedster walking back 1.png");
+                    model[1] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\speedster walking back 2.png");
+                    model[2] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\speedster walking back 3.png");
+                    model[3] = new Image(cha.toURI().toString());
+                    
+                    ivModel = new ImageView(model[1]);
                     break;
                 default:
                     cha = new File("characters\\Glass Cannon Character.png");
-                    model = new Image(cha.toURI().toString());
-                    ivModel = new ImageView(model);
+                    model[0] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\Glass Cannon Back 1.png");
+                    model[1] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\Glass Cannon Back 2.png");
+                    model[2] = new Image(cha.toURI().toString());
+                    cha = new File("characters\\Glass Cannon Back 3.png");
+                    model[3] = new Image(cha.toURI().toString());
+                    
+                    ivModel = new ImageView(model[1]);
                     break;
             }
             
             ivModel.setFitHeight(50);
             ivModel.setFitWidth(50);
-            ivModel.setX(225);
-            ivModel.setY(225);
+            ivModel.setX(x);
+            ivModel.setY(y);
             
             File bossFile = new File("enemies\\Lemon King.png");
             Image boss = new Image(bossFile.toURI().toString());
@@ -691,11 +726,14 @@ public class Gameplay extends Pane{
             ivBoss.setLayoutX(200);
             ivBoss.setLayoutY(0);
             
-            getChildren().addAll(ivModel, ivBoss);
+            getChildren().add(ivModel);
+            
+            if(!bossDefeated) getChildren().add(ivBoss);
         }
         
         /*
             The next 4 methods move the character in 4 directions based on key input (up, down, left, right)
+            After each movement, the game checks to see if the character is in range of the boss and checks to see if the user runs into an enemy
         */
         
         public void moveRight() {
@@ -765,7 +803,7 @@ public class Gameplay extends Pane{
             switch (upN) {
                 case 1:
                     ivModel.setY(ivModel.getY() - 2.5);
-                    ivModel.setImage(new Image(new File("characters\\Glass Cannon Back 2.png").toURI().toString()));
+                    ivModel.setImage(model[2]);
                     upN = 2;
                     downN = 1;
                     leftN = 1;
@@ -773,18 +811,21 @@ public class Gameplay extends Pane{
                     break;
                 case 2:
                     ivModel.setY(ivModel.getY() - 2.5);
-                    ivModel.setImage(new Image(new File("characters\\Glass Cannon Back 3.png").toURI().toString()));
+                    ivModel.setImage(model[3]);
                     upN = 3;
                     break;
                 case 3:
                     ivModel.setY(ivModel.getY() - 2.5);
-                    ivModel.setImage(new Image(new File("characters\\Glass Cannon Back 1.png").toURI().toString()));
+                    ivModel.setImage(model[1]);
                     upN = 1;
                     break;
             }
             if (!bossDefeated && (ivModel.getX() >= ivBoss.getX() && ivModel.getX() <= ivBoss.getX() + 400) && (ivModel.getY() >= ivBoss.getY() && ivModel.getY() <= ivBoss.getY() + 100)) {
                 deleteBoss();
                 bossBattle();
+            } else if ((int)(Math.random() * 25) == 1) {
+                allowMove = false;
+                encounter();
             }
         }
         
@@ -793,7 +834,7 @@ public class Gameplay extends Pane{
             switch (upN) {
                 case 1:
                     ivModel.setY(ivModel.getY() + 2.5);
-                    ivModel.setImage(new Image(new File("characters\\Glass Cannon Character.png").toURI().toString()));
+                    ivModel.setImage(model[0]);
                     upN = 1;
                     downN = 2;
                     leftN = 1;
@@ -801,12 +842,12 @@ public class Gameplay extends Pane{
                     break;
                 case 2:
                     ivModel.setY(ivModel.getY() + 2.5);
-                    ivModel.setImage(new Image(new File("characters\\Glass Cannon Character.png").toURI().toString()));
+                    ivModel.setImage(model[0]);
                     downN = 3;
                     break;
                 case 3:
                     ivModel.setY(ivModel.getY() + 2.5);
-                    ivModel.setImage(new Image(new File("characters\\Glass Cannon Character.png").toURI().toString()));
+                    ivModel.setImage(model[0]);
                     downN = 1;
                     break;
             }
@@ -818,21 +859,6 @@ public class Gameplay extends Pane{
                 allowMove = false;
                 encounter();
             }
-        }
-    }
-    
-    public class ButtonToStart extends Pane {
-        public ButtonToStart() {
-            Button start = new Button("Click Here");
-            start.setPrefWidth(100);
-            start.setPrefHeight(100);
-            start.setLayoutX(200);
-            start.setLayoutY(200);
-            start.setFont(Font.font("Times", 16));
-            
-            getChildren().add(start);
-            
-            start.setOnAction(e -> backToMap());
         }
     }
 }
